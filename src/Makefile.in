@@ -1,0 +1,7 @@
+all: %DESTDIR%/soundtouch_wrapper%SO%
+
+%DESTDIR%/soundtouch_wrapper%SO%: soundtouch_wrapper%O%
+	%LD% %LDSHARED% %LDFLAGS% %LIBS% -lSoundTouch %LDOUT%%DESTDIR%/soundtouch_wrapper%SO% soundtouch_wrapper%O%
+
+soundtouch_wrapper%O%: soundtouch_wrapper.cpp
+	%CC% -c %CCSHARED% %CCFLAGS% %CCOUT%soundtouch_wrapper%O% soundtouch_wrapper.cpp
