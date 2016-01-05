@@ -7,8 +7,8 @@ Build
 !Build/
 Build.bat
 .last_cover_stats
-/Makefile
-/Makefile.old
+Makefile
+Makefile.old
 /MANIFEST.bak
 /META.yml
 /META.json
@@ -18,3 +18,6 @@ nytprof.out
 *.o
 *.bs
 /_eumm/
+.precomp
+*.so
+*.rev-deps
