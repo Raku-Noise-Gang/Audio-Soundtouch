@@ -2,53 +2,47 @@ use v6;
 
 
 class Audio::SoundTouch {
-    use LibraryMake;
     use NativeCall;
 
-    sub library {
-        my $so = get-vars('')<SO>;
-        my $libname = "soundtouch_wrapper$so";
-        my $base = "lib/Sys/Lastlog/$libname";
-        for @*INC <-> $v {
-            if $v ~~ Str {
-                $v ~~ s/^.*\#//;
-                if ($v ~ '/' ~ $libname).IO.r {
-                    return $v ~ '/' ~ $libname;
-                }
-            }
-            else {
-                if my @files = ($v.files($base) || $v.files("blib/$base")) {
-                    my $files = @files[0]<files>;
-                    my $tmp = $files{$base} || $files{"blib/$base"};
+    constant LIB = "SoundTouch", v1; 
 
-                    $tmp.IO.copy($*SPEC.tmpdir ~ '/' ~ $libname);
-                    return $*SPEC.tmpdir ~ '/' ~ $libname;
-                }
-            }
-        }
-        die "Unable to find library";
+    class FIFOSamplePipe is repr('CPPStruct') {
     }
 
-    class Touch is repr('CPointer') {
-
-        sub soundtouch_new() returns Touch is native(&library) { * }
-
-        method new(*%params) {
-            soundtouch_new();
-        }
-
-        sub soundtouch_free(Touch) is native(&library) { * }
-
-        method DESTROY() {
-            soundtouch_free(self);
-        }
-
+    class FIFOProcessor is FIFOSamplePipe is repr('CPPStruct') {
+        has FIFOSamplePipe $.output;
     }
 
-    has Touch $!touch;
+    class SoundTouch is FIFOProcessor is repr('CPPStruct') {
+
+        # need this for the missing 8 bytes;
+        has Pointer $!vtable; 
+
+        method new() is nativeconv('thisgnu') is symbol('soundtouch::SoundTouch::new') is native(LIB) { * }
+        method version-string() returns Str is encoded('ascii') is symbol('soundtouch::SoundTouch::getVersionString') is native(LIB) { * }
+
+        method version-id() returns uint32 is symbol('soundtouch::SoundTouch::getVersionId') is native(LIB) { * }
+
+        # Privates'
+
+        has Pointer $.pRateTransposer;
+        has Pointer $.pTDStretch;
+        has num32   $.virtualRate;
+        has num32   $.virtualTempo;
+        has num32   $.virtualPitch;
+        has int32   $.bSrateSet;
+
+        # Protected
+
+        has uint32  $.channels;
+        has num32   $.rate;
+        has num32   $.tempo;
+    }
+
+    has SoundTouch $!touch handles <version-string version-id>;
 
     multi submethod BUILD(*%params) {
-        $!touch = Touch.new(|%params);
+        $!touch = SoundTouch.new();
     }
 
 }
