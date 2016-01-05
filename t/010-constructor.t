@@ -10,6 +10,8 @@ my $obj;
 lives-ok { $obj = Audio::SoundTouch.new }, "create a new Audio::SoundTouch";
 isa-ok($obj, Audio::SoundTouch, 'and it is the right sort of object');
 
-done;
+diag "Testing with SoundTouch " ~ $obj.version-string;
+
+done-testing;
 
 # vim: expandtab shiftwidth=4 ft=perl6
