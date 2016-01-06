@@ -86,8 +86,10 @@ class Audio::SoundTouch {
 
     has SoundTouch $!touch handles <version-string version-id>;
 
-    multi submethod BUILD(*%params) {
+    multi submethod BUILD(Int :$samplerate = 44100, :$channels = 2, *%params) {
         $!touch = SoundTouch.new();
+        $!touch.set-samplerate($samplerate);
+        $!touch.set-channels($channels);
     }
 
 }
